@@ -110,9 +110,16 @@ override LDFLAGS += \
     --gc-sections \
     -T linker-scripts/x86_64.lds
 
+
 # Default target. This must come first, before header dependencies.
 .PHONY: all
-all: bin/$(OUTPUT)
+all: deps bin/$(OUTPUT)
+
+.PHONY: deps
+deps:
+	@for d in ../deps_build/*/*_build; do \
+		$(MAKE) -f $$d; \
+	done
 
 DEP_CFILES :=
 DEP_INCLUDES :=
@@ -124,7 +131,7 @@ override CFILES := $(filter %.c,$(SRCFILES))
 override ASFILES := $(filter %.S,$(SRCFILES))
 override NASMFILES := $(filter %.asm,$(SRCFILES))
 
-DEP_MAKEFILES := $(wildcard ../deps_build/*/Makefile)
+DEP_MAKEFILES := $(wildcard ../deps_build/*/*_include)
 include $(DEP_MAKEFILES)
 
 override CFILES += $(DEP_CFILES)
@@ -142,22 +149,22 @@ override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
 # Link rules for the final executable.
 bin/$(OUTPUT): GNUmakefile linker-scripts/x86_64.lds $(OBJ)
-	mkdir -p "$(dir $@)"
+	@mkdir -p "$(dir $@)"
 	$(LD) $(LDFLAGS) $(OBJ) -o $@
 
 # Compilation rules for *.c files.
 obj/%.c.o: %.c GNUmakefile
-	mkdir -p "$(dir $@)"
+	@mkdir -p "$(dir $@)"
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 # Compilation rules for *.S files.
 obj/%.S.o: %.S GNUmakefile
-	mkdir -p "$(dir $@)"
+	@mkdir -p "$(dir $@)"
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 # Compilation rules for *.asm (nasm) files.
 obj/%.asm.o: %.asm GNUmakefile
-	mkdir -p "$(dir $@)"
+	@mkdir -p "$(dir $@)"
 	nasm $(NASMFLAGS) $< -o $@
 
 # Remove object files and the final executable.
@@ -169,6 +176,10 @@ clean:
 .PHONY: distclean
 distclean: clean
 	rm -rf .deps-obtained .cache compile_commands.json freestanding-c-hdrs cc-runtime limine-protocol
+	@for d in ../deps_build/*/*_build; do \
+		echo $$d; \
+		$(MAKE) -f $$d clean; \
+	done
 
 # Install the final built executable to its final on-root location.
 .PHONY: install

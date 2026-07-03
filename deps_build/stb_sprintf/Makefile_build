@@ -1,0 +1,17 @@
+STB_TARGET := ../deps/stb_sprintf/stb_sprintf.h
+STB_TARGET_LOC := $(dir $(STB_TARGET))/include/stb
+STB_REMOTE := https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_sprintf.h
+STB_PATCH := ../patches/stb_sprintf.patch
+
+$(STB_TARGET):
+	mkdir -p $(STB_TARGET_LOC)
+	wget -P $(dir $(STB_TARGET)) $(STB_REMOTE)
+	cp $(STB_TARGET) $(STB_TARGET_LOC)
+	patch -p1 $(STB_TARGET_LOC)/stb_sprintf.h < $(STB_PATCH)
+
+.PHONY: all
+all: $(STB_TARGET)
+
+.PHONY: clean
+clean:
+	rm -rf $(dir $(STB_TARGET))

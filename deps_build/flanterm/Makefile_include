@@ -1,0 +1,6 @@
+FLANTERM_SRCDIR := ../deps/flanterm/src/
+
+FLANTERM_FILES := $(shell find -L $(FLANTERM_SRCDIR) -type f 2>/dev/null | LC_ALL=C sort)
+
+DEP_CFILES += $(filter %.c,$(FLANTERM_FILES))
+DEP_INCLUDES += $(FLANTERM_SRCDIR)

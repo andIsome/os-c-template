@@ -1,0 +1,6 @@
+STB_TARGET := ../deps/stb_sprintf/stb_sprintf.h
+STB_TARGET_LOC := $(dir $(STB_TARGET))/include/stb
+STB_REMOTE := https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_sprintf.h
+STB_PATCH := ../../patches/stb_sprintf.patch
+
+DEP_INCLUDES += $(dir $(STB_TARGET_LOC))
