@@ -82,12 +82,14 @@ override CFLAGS += \
     -mno-sse \
     -mno-sse2 \
     -mno-red-zone \
-    -mcmodel=kernel
+    -mcmodel=kernel \
+	-Wno-sign-compare
 
 # Internal C preprocessor flags that should not be changed by the user.
 override CPPFLAGS := \
     -I src \
     -I limine-protocol/include \
+	-I include \
     -isystem freestanding-c-hdrs/include \
     $(CPPFLAGS) \
     -MMD \
@@ -108,18 +110,32 @@ override LDFLAGS += \
     --gc-sections \
     -T linker-scripts/x86_64.lds
 
+# Default target. This must come first, before header dependencies.
+.PHONY: all
+all: bin/$(OUTPUT)
+
+DEP_CFILES :=
+DEP_INCLUDES :=
+
 # Use "find" to glob all *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
 override SRCFILES := $(shell find -L src cc-runtime/src -type f 2>/dev/null | LC_ALL=C sort)
 override CFILES := $(filter %.c,$(SRCFILES))
 override ASFILES := $(filter %.S,$(SRCFILES))
 override NASMFILES := $(filter %.asm,$(SRCFILES))
+
+DEP_MAKEFILES := $(wildcard ../deps_build/*/Makefile)
+include $(DEP_MAKEFILES)
+
+override CFILES += $(DEP_CFILES)
+override CFLAGS += $(addprefix -I,$(DEP_INCLUDES))
+
+$(info DEP_MAKEFILES=$(DEP_MAKEFILES))
+$(info DEP_CFILES=$(DEP_CFILES))
+$(info DEP_INCLUDES=$(DEP_INCLUDES))
+
 override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o))
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
-
-# Default target. This must come first, before header dependencies.
-.PHONY: all
-all: bin/$(OUTPUT)
 
 # Include header dependencies.
 -include $(HEADER_DEPS)

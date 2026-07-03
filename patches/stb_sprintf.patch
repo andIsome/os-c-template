@@ -1,0 +1,20 @@
+diff --git a/deps/stb_sprintf/include/stb/stb_sprintf.h b/deps/stb_sprintf/include/stb/stb_sprintf2.h
+index ca432a6..a708300 100644
+--- a/deps/stb_sprintf/stb_sprintf.h
++++ b/deps/stb_sprintf/include/stb/stb_sprintf.h
+@@ -626,7 +626,15 @@ STBSP__PUBLICDEF int STB_SPRINTF_DECORATE(vsprintfcb)(STBSP_SPRINTFCB *callback,
+       case 'E':              // float
+       case 'e':              // float
+       case 'f':              // float
++#if 0
+          va_arg(va, double); // eat it
++#else
++         _Static_assert(
++            sizeof(double) == sizeof(unsigned long long),
++            "va args size mismatch"
++         );
++         va_arg(va, unsigned long long); // eat it
++#endif
+          s = (char *)"No float";
+          l = 8;
+          lead[0] = 0;
