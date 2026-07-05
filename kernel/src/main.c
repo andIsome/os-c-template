@@ -1,9 +1,8 @@
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
+#include <types.h>
 #include <limine.h>
 
 #include <flanterm_backends/fb.h>
+#include <list.h>
 
 #include "log/log.h"
 
